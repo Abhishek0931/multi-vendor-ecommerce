@@ -16,6 +16,9 @@ const orderSchema = new mongoose.Schema({
     shippingAddress: { type: String, required: true },
     billingAddress: { type: String, required: true },
     paymentInfo: { type: Object }, // You can expand this as needed
+    coupon: { type: mongoose.Schema.Types.ObjectId, ref: 'Coupon' },
+    discount: { type: Number, default: 0 },
+    finalAmount: { type: Number, required: true },
     createdAt: { type: Date, default: Date.now }
 });
 
