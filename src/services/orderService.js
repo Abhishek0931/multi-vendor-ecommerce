@@ -16,6 +16,7 @@ class OrderService {
             items: cart.items,
             totalAmount,
             shippingAddress,
+            billingAddress,
             paymentInfo,
             status: 'pending'
         };

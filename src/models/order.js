@@ -14,6 +14,7 @@ const orderSchema = new mongoose.Schema({
     totalAmount: { type: Number, required: true },
     status: { type: String, enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
     shippingAddress: { type: String, required: true },
+    billingAddress: { type: String, required: true },
     paymentInfo: { type: Object }, // You can expand this as needed
     createdAt: { type: Date, default: Date.now }
 });

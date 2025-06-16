@@ -11,8 +11,9 @@ export const placeOrder = async (req, res) => {
             return res.status(403).json({ message: 'User is blocked or not found' });
         }
 
-        const { shippingAddress, paymentInfo } = req.body;
-        const order = await orderService.placeOrder(req.user._id, shippingAddress, paymentInfo);
+        const { shippingAddress, billingAddress, paymentInfo } = req.body;
+        if (!billingAddress) billingAddress = shippingAddress;
+        const order = await orderService.placeOrder(req.user._id, shippingAddress, billingAddress, paymentInfo);
         res.status(201).json(order);
     } catch (error) {
         res.status(400).json({ message: error.message });
