@@ -8,6 +8,7 @@ import productRoutes from './src/routes/productRoutes.js';
 import colorRoutes from './src/routes/colorRoutes.js';
 import sizeRoutes from './src/routes/sizeRoutes.js';
 import cartRoutes from './src/routes/cartRoutes.js';
+import orderRoutes from './src/routes/orderRoutes.js';
 
 dotenv.config();
 await connectDB();
@@ -23,6 +24,7 @@ app.use('/api/subcategories',subcategoryRoutes);
 app.use('/api/colors', colorRoutes);
 app.use('/api/sizes', sizeRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/', (req, res) => res.send('multi-vendor-Ecommerece backend practice'));
 
