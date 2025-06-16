@@ -39,6 +39,9 @@ class UserService {
     }
 
     async updateProfile(userId, updateData) {
+        const user = await userRepo.getUserById(userId);
+        if (!user) throw new Error('User not found');
+        if (user.isBlocked) throw new Error('User is blocked');
         if (updateData.password) {
             updateData.password = await hashPassword(updateData.password);
         }

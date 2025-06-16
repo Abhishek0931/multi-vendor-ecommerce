@@ -119,7 +119,7 @@ export const getVendorProducts = async (req, res) => {
 export const approveProduct = async (req, res) => {
     try {
         const product = await productService.approveProduct(req.params.id);
-        res.json(product);
+        res.json({ message: 'Product Approved', product });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -128,7 +128,7 @@ export const approveProduct = async (req, res) => {
 export const rejectProduct = async (req, res) => {
     try {
         const product = await productService.rejectProduct(req.params.id);
-        res.json(product);
+        res.json({ message: 'Product Rejected', product });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

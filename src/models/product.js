@@ -26,8 +26,7 @@ const variantSchema = new mongoose.Schema({
     },
 
     images: [{ type: String, required: true }]
-},
-{ _id: false });
+});
 
 const productSchema = new mongoose.Schema({
     name: {
@@ -41,12 +40,6 @@ const productSchema = new mongoose.Schema({
         required: false,
         trim: true
     },
-
-    price: {
-        type: Number,
-        required: true,
-        min: 0
-    }, // base price or default
 
     category: {
         type: mongoose.Schema.Types.ObjectId,
