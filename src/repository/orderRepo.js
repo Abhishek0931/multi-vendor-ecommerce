@@ -5,13 +5,13 @@ class OrderRepository {
         return await Order.create(orderData);
     }
     async getOrderById(orderId) {
-        return await Order.findById(orderId).populate('items.product items.vendor user');
+        return await Order.findById(orderId).populate('items.product items.vendor user coupon');
     }
     async getOrdersByUser(userId) {
-        return await Order.find({ user: userId }).populate('items.product items.vendor');
+        return await Order.find({ user: userId }).populate('items.product items.vendor coupon');
     }
     async getOrdersByVendor(vendorId) {
-        return await Order.find({ 'items.vendor': vendorId }).populate('items.product user');
+        return await Order.find({ 'items.vendor': vendorId }).populate('items.product user coupon');
     }
     async updateOrderStatus(orderId, status) {
         return await Order.findByIdAndUpdate(orderId, { status }, { new: true });

@@ -84,7 +84,11 @@ export const updateOrderStatus = async (req, res) => {
             order.user.equals(user._id) ||
             (user.role === 'vendor' && order.items.some(item => item.vendor.equals(user._id)))
         ) {
-            const updatedOrder = await orderService.updateOrderStatus(req.params.orderId, req.body.status);
+            const { shipmentStatus, paymentStatus } = req.body;
+            const updatedOrder = await orderService.updateOrderStatus(
+                req.params.orderId, 
+                { shipmentStatus, paymentStatus }
+            );
             res.json(updatedOrder);
         }
 
@@ -109,6 +113,16 @@ export const cancelOrder = async (req, res) => {
         }
 
         return res.status(403).json({ message: 'Forbidden' });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const confirmPayment = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        await orderService.markOrderAsPaid(orderId);
+        res.json({ message: 'Order marked as paid and inventory updated.' });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

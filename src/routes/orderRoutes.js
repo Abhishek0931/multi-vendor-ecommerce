@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticate } from '../middlewares/authenticate.js';
+import { authorizeRoles } from '../middlewares/authorize.js';
 import {
     placeOrder,
     getOrderById,
@@ -15,7 +16,7 @@ router.post('/place', authenticate, placeOrder);
 router.get('/user', authenticate, getUserOrders);
 router.get('/vendor', authenticate, getVendorOrders);
 router.get('/:orderId', authenticate, getOrderById);
-router.patch('/:orderId/status', authenticate, updateOrderStatus);
+router.patch('/:orderId/status', authenticate,authorizeRoles('vendor', 'admin'), updateOrderStatus);
 router.patch('/:orderId/cancel', authenticate, cancelOrder);
 
 /* 

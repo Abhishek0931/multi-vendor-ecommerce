@@ -1,4 +1,6 @@
 import ProductService from '../services/productService.js';
+import InventoryService from '../services/inventoryService.js';
+import Inventory from '../models/inventory.js';
 
 const productService = new ProductService();
 
@@ -17,6 +19,17 @@ export const createProduct = async (req, res) => {
 
         productData.variants = variants;
         const product = await productService.createProduct(productData);
+
+        for (const variant of product.variants) {
+            await Inventory.create({
+                product: product._id,
+                variant: variant._id,
+                vendor: product.vendor, // or req.user._id if vendor is the creator
+                stock: variant.stock,
+                reserved: 0
+            });
+        }
+
         res.status(201).json(product);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -72,7 +85,7 @@ export const updateProduct = async (req, res) => {
                 const color = req.body[`variants[${idx}][color]`];
                 const size = req.body[`variants[${idx}][size]`];
                 const price = req.body[`variants[${idx}][price]`];
-                const quantity = req.body[`variants[${idx}][quantity]`];
+                const stock = req.body[`variants[${idx}][stock]`];
                 const images = req.files
                     .filter(file => file.fieldname === `variants[${idx}][images]`)
                     .map(file => file.path);
@@ -81,7 +94,7 @@ export const updateProduct = async (req, res) => {
                     color,
                     size,
                     price,
-                    quantity,
+                    stock,
                     images
                 });
             });
@@ -129,6 +142,31 @@ export const rejectProduct = async (req, res) => {
     try {
         const product = await productService.rejectProduct(req.params.id);
         res.json({ message: 'Product Rejected', product });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+const inventoryService = new InventoryService();
+
+export const getProductWithStock = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.productId);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        // For each variant, get stock
+        const variantsWithStock = await Promise.all(product.variants.map(async (variant) => {
+            const inventory = await inventoryService.getInventory(product._id, variant._id, product.vendor);
+            return {
+                ...variant.toObject(),
+                stock: inventory ? inventory.stock : 0
+            };
+        }));
+
+        res.json({
+            ...product.toObject(),
+            variants: variantsWithStock
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

@@ -11,6 +11,9 @@ const cartItemSchema = new mongoose.Schema({
 const cartSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     items: [cartItemSchema],
+    coupon: { type: mongoose.Schema.Types.ObjectId, ref: 'Coupon' },
+    discount: { type: Number, default: 0 },
+    finalAmount: { type: Number, default: 0 },
     updatedAt: { type: Date, default: Date.now }
 });
 

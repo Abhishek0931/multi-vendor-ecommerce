@@ -2,7 +2,7 @@ import Cart from '../models/cart.js';
 
 class CartRepository {
     async getCartByUser(userId) {
-        return await Cart.findOne({ user: userId }).populate('items.product items.vendor');
+        return await Cart.findOne({ user: userId }).populate('items.product items.vendor coupon');
     }
 
     async createOrUpdateCart(userId, items) {

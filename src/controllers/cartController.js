@@ -49,3 +49,22 @@ export const emptyCart = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+export const applyCoupon = async (req, res) => {
+    try {
+        const { couponCode } = req.body;
+        const cart = await cartService.applyCoupon(req.user._id, couponCode);
+        res.json(cart);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const removeCoupon = async (req, res) => {
+    try {
+        const cart = await cartService.removeCoupon(req.user._id);
+        res.json(cart);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
