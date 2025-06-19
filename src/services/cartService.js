@@ -17,8 +17,11 @@ class CartService {
         // Always use ObjectIds from DB for comparison and storage
         const product = await Product.findById(item.product);
         if (!product) throw new Error('Product not found');
+        if (!product.isApproved) throw new Error('Product is not approved and cannot be added to cart.');
+
         const variant = product.variants.id(item.variant);
         if (!variant) throw new Error('Variant not found');
+        
         const vendor = await User.findById(item.vendor);
         if (!vendor || vendor.role !== 'vendor') throw new Error('Vendor not found');
 

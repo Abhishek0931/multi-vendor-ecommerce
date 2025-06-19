@@ -1,6 +1,8 @@
+import Coupon from '../models/coupon.js';
+import User from '../models/user.js';
+import Product from '../models/product.js';
 import OrderRepository from '../repository/orderRepo.js';
 import CartRepository from '../repository/cartRepo.js';
-import Coupon from '../models/coupon.js';
 import InventoryService from './inventoryService.js';
 
 const orderRepo = new OrderRepository();
@@ -9,8 +11,36 @@ const inventoryService = new InventoryService();
 
 class OrderService {
     async placeOrder(userId, shippingAddress, billingAddress, paymentInfo) {
+        
+        // Check if the user exists and is not blocked
+        const user = await User.findById(userId);
+        if (!user) throw new Error('User not found');
+        if (user.isBlocked) throw new Error('Your account is blocked. You cannot place orders.');
+        
         const cart = await cartRepo.getCartByUser(userId);
         if (!cart || !cart.items.length) throw new Error('Cart is empty');
+
+        // Check if all products are approved
+        for (const item of cart.items) {
+            const product = await Product.findById(item.product);
+            if (!product) throw new Error ('Product not found');
+            if (!product.isApproved) {
+                throw new Error(`Product ${product.name} is not approved for sale`);
+            }
+        }
+        // Check if the coupon applied is valid or not
+        if (cart.coupon) {
+            const coupon = await Coupon.findById(cart.coupon);
+            if (
+                !coupon ||
+                !coupon.isActive ||
+                (coupon.expiresAt && coupon.expiresAt < new Date()) ||
+                (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) ||
+                coupon.userUsed.includes(userId)
+            ) {
+                throw new Error('coupon is no longer valid or has expired');
+            }
+        }
 
         // Reserve stock for each item before placing the order
         for (const item of cart.items) {
@@ -89,7 +119,7 @@ class OrderService {
         // (You can add more logic here if needed)
 
         if (shipmentStatus) {
-        order.status = newStatus;
+        order.status = shipmentStatus;
         }
         if (paymentStatus) {
             order.paymentInfo.status = paymentStatus;

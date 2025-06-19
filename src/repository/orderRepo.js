@@ -1,6 +1,10 @@
 import Order from '../models/order.js';
 
 class OrderRepository {
+    constructor() {
+        this.model = Order;
+    }
+
     async createOrder(orderData) {
         return await Order.create(orderData);
     }
@@ -18,6 +22,14 @@ class OrderRepository {
     }
     async cancelOrder(orderId) {
         return await Order.findByIdAndUpdate(orderId, { status: 'cancelled' }, { new: true });
+    }
+
+    async hasUserOrderedProduct(userId, productId) {
+        return await this.model.exists({
+            user: userId,
+            'items.product': productId,
+            status: { $ne: 'cancelled' }
+        });
     }
 }
 

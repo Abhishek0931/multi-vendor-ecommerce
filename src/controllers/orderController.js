@@ -6,11 +6,6 @@ const orderService = new OrderService();
 // Place Order (blocked users cannot place orders)
 export const placeOrder = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
-        if (!user || user.isBlocked) {
-            return res.status(403).json({ message: 'User is blocked or not found' });
-        }
-
         const { shippingAddress, billingAddress, paymentInfo } = req.body;
         if (!billingAddress) billingAddress = shippingAddress;
         const order = await orderService.placeOrder(req.user._id, shippingAddress, billingAddress, paymentInfo);
