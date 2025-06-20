@@ -42,6 +42,12 @@ class UserService {
         const user = await userRepo.getUserById(userId);
         if (!user) throw new Error('User not found');
         if (user.isBlocked) throw new Error('User is blocked');
+
+        // Prevent role update unless user is admin
+        if ('role' in updateData && user.role !== 'admin') {
+            delete updateData.role;
+            throw new Error('Only admin can update user roles');
+        }
         if (updateData.password) {
             updateData.password = await hashPassword(updateData.password);
         }
@@ -62,6 +68,14 @@ class UserService {
 
     async deleteUser(userId) {
         return await userRepo.deleteUser(userId);
+    }
+
+    async updateUserRole(userId, role) {
+        const user = await userRepo.getUserById(userId);
+        if (!user) throw new Error('User not found');
+        user.role = role;
+        await user.save();
+        return user;
     }
 }
 

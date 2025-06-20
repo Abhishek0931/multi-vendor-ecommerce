@@ -8,7 +8,8 @@ import {
     blockUser,
     unblockUser,
     getAllUsers,
-    deleteUser
+    deleteUser,
+    updateUserRole
 } from '../controllers/userController.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { authorizeRoles } from '../middlewares/authorize.js';
@@ -29,5 +30,6 @@ router.get('/', authenticate, authorizeRoles('admin'), getAllUsers);
 router.delete('/:id', authenticate, authorizeRoles('admin'), deleteUser);
 router.put('/block/:id', authenticate, authorizeRoles('admin'), blockUser);
 router.put('/unblock/:id', authenticate, authorizeRoles('admin'), unblockUser);
+router.put('/role/:id', authenticate, authorizeRoles('admin'), updateUserRole);
 
 export default router;

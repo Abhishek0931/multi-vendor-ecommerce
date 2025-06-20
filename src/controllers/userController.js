@@ -50,6 +50,10 @@ export const updateProfile = async (req, res) => {
         if (req.file) {
             updateData.profilePic = req.file.path; // Assuming the file path is stored in req.file.path
         }
+        // Prevent users from updating their own role
+        if ('role' in updateData) {
+            return res.status(403).json({ message: 'You cannot change your own role' });
+        }
         const user = await userService.updateProfile(req.user._id, updateData);;
         res.json(user);
     } catch (error) {
@@ -88,6 +92,22 @@ export const deleteUser = async (req, res) => {
     try {
         const user = await userService.deleteUser(req.params.id);
         res.json(user);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const updateUserRole = async (req, res) => {
+    try {
+        // Prevent non-admin users from updating roles
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Only admin can update user roles' });
+        }
+        const { role } = req.body;
+        const { id } = req.params;
+        if (!role) return res.status(400).jsson({ message: 'Role is required' });
+        const updatedUser = await userService.updateUserRole(id, role);
+        res.json(updatedUser);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
