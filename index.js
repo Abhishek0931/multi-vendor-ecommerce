@@ -1,5 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import Razorpay from 'razorpay';
+import bodyParser from 'body-parser';
+import path from 'path';
+import fs from 'fs';
 import connectDB from './src/utils/db.js';
 import userRoutes from './src/routes/userRoutes.js';
 import categoryRoutes from './src/routes/categoryRoutes.js';
@@ -35,6 +39,10 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => res.send('multi-vendor-Ecommerece backend practice'));
+app.get('/api', (req, res) => res.send('API is running...'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));

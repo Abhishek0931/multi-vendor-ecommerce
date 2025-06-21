@@ -44,6 +44,18 @@ class OrderService {
 
         // Reserve stock for each item before placing the order
         for (const item of cart.items) {
+            const product = await Product.findById(item.product);
+            if (!product) throw new Error('Product not found');
+            if (!product.isApproved) {
+                throw new Error(`Product ${product.name} is not approved for sale`);
+            }
+
+            //check if vendor is blocked
+            const vendor = await User.findById(item.vendor);
+            if (!vendor) throw new Error ('Vendor not found');
+            if (vendor.isBlocked) {
+                throw new Error(`Vendor for product ${product.name} is blocked. YOu cannot checkout this item.`);
+            }
             await inventoryService.reserveStock(item.product, item.variant, item.vendor, item.quantity);
         }
 
