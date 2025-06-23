@@ -10,8 +10,18 @@ class ReviewRepository {
     async deleteReview(reviewId) {
         return await Review.findByIdAndDelete(reviewId);
     }
-    async getReviewsByProduct(productId) {
-        return await Review.find({ product: productId }).populate('user', 'name');
+    async getReviewsByProduct(productId, page = 1, limit = 10) {
+        const skip = (page -1) * limit;
+        const [reviews, total] = await Promise.all([
+            Review.find({ product: productId })
+                .populate('user', 'name')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            Review.countDocuments({ product: productId })
+        ]);
+        
+        return { reviews, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
     async getReviewByUserAndProduct(userId, productId) {
         return await Review.findOne({ user: userId, product: productId });

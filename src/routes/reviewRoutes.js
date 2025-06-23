@@ -13,5 +13,6 @@ router.post('/', authenticate, addReview);
 router.put('/', authenticate, updateReview);
 router.delete('/:productId', authenticate, deleteReview);
 router.get('/product/:productId', getProductReviews);
+// /api/reviews/product/:productId?page=2&limit=10 (pagination applied)
 
 export default router;

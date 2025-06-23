@@ -38,8 +38,8 @@ class ReviewService {
         return;
     }
 
-    async getProductReviews(productId) {
-        return await reviewRepo.getReviewsByProduct(productId);
+    async getProductReviews(productId, page = 1, limit = 10) {
+        return await reviewRepo.getReviewsByProduct(productId, page, limit);
     }
 }
 
