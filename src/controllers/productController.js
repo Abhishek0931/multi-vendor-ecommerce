@@ -50,7 +50,10 @@ export const getAllProducts = async (req, res) => {
         // Only show approved products to buyers
         let filter = {};
         if (req.user?.role === 'buyer' || !req.user) filter.isApproved = true;
-        res.json(await productService.getAllProducts(filter));
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const result = await productService.getAllProducts(filter, page, limit);
+        res.json(result);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

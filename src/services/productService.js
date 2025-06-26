@@ -11,8 +11,8 @@ class ProductService {
         return await productRepo.getProductById(productId);
     }
 
-    async getAllProducts(filter) {
-        return await productRepo.getAllProducts(filter);
+    async getAllProducts(filter, page, limit) {
+        return await productRepo.getAllProducts(filter, page, limit);
     }
 
     async updateProduct(productId, updateData, user) {

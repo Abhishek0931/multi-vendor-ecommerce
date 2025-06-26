@@ -23,6 +23,7 @@ router.get('/my', authenticate, authorizeRoles('vendor'), getVendorProducts);
 
 // Public & Buyer routes
 router.get('/all', getAllProducts);
+//              /api/products/all?page=2&limit=20 (pagination applied)
 router.get('/:id', getProductById);
 
 // Admin routes

@@ -1,5 +1,6 @@
 import OrderService from '../services/orderService.js';
 import User from '../models/user.js';
+import Order from '../models/order.js';
 
 const orderService = new OrderService();
 
@@ -18,37 +19,60 @@ export const placeOrder = async (req, res) => {
 //Get Order By ID (authorization: admin, order owner, or vendor in order)
 export const getOrderById = async (req, res) => {
     try {
-        const order = await orderService.getOrderById(req.params.orderId);
-        const user = req.user;
+        const { orderId } = req.params;
+        const userId = req.user._id;
+        const userRole = req.user.role;
 
-        if (user.role === 'admin') return res.json(order);
+        // Fetch the order with product and vendor details
+        const order = await Order.findById(orderId)
+            .populate({
+                path: 'items.product',
+                select: 'vendor',
+                populate: { path: 'vendor', select: '_id' }
+            })
+            .lean();
 
-        if (order.user.equals(user._id)) return res.json(order);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
 
-        const isVendorInOrder = order.items.some(
-            item => item.vendor.equals(user._id)
+        // Check if the user is the order owner
+        const isOrderOwner = order.user.toString() === userId.toString();
+
+        // Check if the user is a vendor for any product in the order
+        const isVendor = order.items.some(item =>
+            item.product.vendor && item.product.vendor._id.toString() === userId.toString()
         );
-        if (user.role === 'vendor' && isVendorInOrder) return res.json(order);
-        
-        return res.status(403).json({ message: 'Forbidden' });
+
+        // Check if the user is an admin
+        const isAdmin = userRole === 'admin';
+
+        if (!isOrderOwner && !isVendor && !isAdmin) {
+            return res.status(403).json({ message: 'Forbidden: You are not authorized to view this order.' });
+        }
+
+        return res.json(order);
     } catch (error) {
-        res.status(404).json({ message: error.message });
+        return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
 
 // Get all orders for the logged-in user (authorization: user or admin)
 export const getUserOrders = async (req, res) => {
     try {
         const user = req.user;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         // Only admin or the user themselves can access
         if (user.role !== 'admin') {
             // Only allow the logged-in user to get their own orders
-            const orders = await orderService.getOrdersByUser(user._id);
-            return res.json(orders);
+            const result = await orderService.getOrdersByUserPaginated(user._id, page, limit);
+            return res.json(result);
         }
         // If admin, you may want to allow fetching all orders or require a userId param
-        const orders = await orderService.getOrdersByUser(user._id); // or all users if you want
-        res.json(orders);
+        const result = await orderService.getOrdersByUserPaginated(user._id, page, limit); // or all users if you want
+        res.json(result);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -61,8 +85,10 @@ export const getVendorOrders = async (req, res) => {
         if (user.role !== 'admin' && user.role !== 'vendor') {
             return res.status(403).json({ message: 'Forbidden' });
         }
-        const orders = await orderService.getOrdersByVendor(user._id);
-        res.json(orders);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const result = await orderService.getOrdersByVendor(user._id, page, limit);
+        res.json(result);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

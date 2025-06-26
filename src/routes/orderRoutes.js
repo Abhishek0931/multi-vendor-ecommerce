@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post('/place', authenticate, placeOrder);
 router.get('/user', authenticate, getUserOrders);
-router.get('/vendor', authenticate, getVendorOrders);
+router.get('/vendor', authenticate,authorizeRoles('vendor', 'admin'), getVendorOrders);
 router.get('/:orderId', authenticate, getOrderById);
 router.patch('/:orderId/status', authenticate,authorizeRoles('vendor', 'admin'), updateOrderStatus);
 router.patch('/:orderId/cancel', authenticate, cancelOrder);

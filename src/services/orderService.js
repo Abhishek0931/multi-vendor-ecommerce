@@ -106,8 +106,16 @@ class OrderService {
         return await orderRepo.getOrdersByUser(userId);
     }
 
+    async getOrdersByUserPaginated(userId, page = 1, limit = 10) {
+        return await orderRepo.getOrdersByUserPaginated(userId, page, limit);
+    }
+
     async getOrdersByVendor(vendorId) {
         return await orderRepo.getOrdersByVendor(vendorId);
+    }
+
+    async getOrdersByVendorPaginated(vendorId, page = 1, limit = 10) {
+        return await orderRepo.getOrdersByVendorPaginated(vendorId, page, limit);
     }
 
     async updateOrderStatus(orderId, { shipmentStatus, paymentStatus }) {

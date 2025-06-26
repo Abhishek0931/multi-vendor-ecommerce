@@ -10,8 +10,22 @@ class ProductRepository {
         return await Product.findById(productId);
     }
 
-    async getAllProducts(filter = {}) {
-        return await Product.find(filter).populate('vendor', 'name email');
+    async getAllProducts(filter = {}, page = 1, limit = 10) {
+        const skip = (page -1) * limit;
+        const [products, total] = await Promise.all([
+            Product.find(filter)
+                .populate('vendor', 'name')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            Product.countDocuments(filter)
+        ]);
+        return {
+            products,
+            total,
+            page,
+            pages: Math.ceil(total / limit)
+        };
     }
 
     async updateProduct(productId, updateData) {
