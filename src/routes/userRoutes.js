@@ -2,6 +2,8 @@ import express from 'express';
 import {
     register,
     login,
+    requestOtpLogin,
+    loginWithOtp,
     refresh,
     getProfile,
     updateProfile,
@@ -21,6 +23,8 @@ const router = express.Router();
 
 router.post('/register', uploadFile, register);
 router.post('/login', login);
+router.post('/login/otp/request', requestOtpLogin);
+router.post('/login/otp/verify', loginWithOtp);
 router.post('/refresh', refresh);
 
 router.get('/profile', authenticate, getProfile);
