@@ -2,6 +2,7 @@ import UserService from '../services/userService.js';
 import { generateOTP, otpExpiry } from '../utils/otp.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 import { sendOTPEmail } from '../utils/mailer.js';
+import { hashPassword } from '../utils/password.js';
 import User from '../models/user.js';
 
 const userService = new UserService();
@@ -69,6 +70,53 @@ export const loginWithOtp = async (req, res) => {
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
         res.json({ user, accessToken, refreshToken });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+//Request OTP for password reset
+export const requestPasswordResetOtp = async (req, res) => {
+    try {
+        const {email} = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (user.isBlocked) return res.stratus(403).json({ message: 'User is bloked'});
+
+        const otp = generateOTP();
+        user.otp = { code: otp, expiresAt: otpExpiry() };
+        await user.save();
+
+        await sendOTPEmail(email, otp);
+        res.json({ message: 'OTP sent to your email for password reset.' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const resetPasswordWithOtp = async(req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+        const user = await User.findOne ({ email });
+        if (!user) return res.status(404).json({ message: 'user not found' });
+        if (user.isBlocked) return res.status(403).json({ message: 'User is blocked' });
+
+        console.log(user.otp, otp, user.otp.expiresAt, new Date());
+
+        if (
+            !user.otp ||
+            user.otp.code !== otp ||
+            !user.otp.expiresAt ||
+            user.otp.expiresAt < new Date()
+        ) {
+            return res.status(400).json({ message:'Invalid or expired OTP' });
+        }
+
+        user.password = await hashPassword(newPassword);
+        user.otp = undefined;
+        await user.save();
+        
+        res.json({ message: 'Password reset successful. You can now log in with your new password.' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

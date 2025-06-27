@@ -4,6 +4,8 @@ import {
     login,
     requestOtpLogin,
     loginWithOtp,
+    requestPasswordResetOtp,
+    resetPasswordWithOtp,
     refresh,
     getProfile,
     updateProfile,
@@ -29,6 +31,8 @@ router.post('/refresh', refresh);
 
 router.get('/profile', authenticate, getProfile);
 router.put('/profile', authenticate, uploadFile, updateProfile);
+router.post('/password/reset/request', requestPasswordResetOtp);
+router.post('/password/reset', resetPasswordWithOtp);
 
 router.get('/', authenticate, authorizeRoles('admin'), getAllUsers);
 router.delete('/:id', authenticate, authorizeRoles('admin'), deleteUser);
